@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>全球著名巧克力品牌分佈圖</title>
+  <style>
+    :root {
+      --choc-dark: #2d1b15;
+      --choc-gold: #c5a059;
+      --pin-main: #e67e22; /* 指定品牌：橘色 */
+      --pin-new: #8e44ad;  /* 新增品牌：紫色 */
+    }
+
+    body {
+      font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background-color: #fcf8f5;
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 60px;
+    }
+
+    h1 {
+      color: var(--choc-dark);
+      font-size: 2.2rem;
+      margin: 20px 0;
+    }
+
+    .map-container {
+      position: relative;
+      width: 95vw;
+      max-width: 1300px;
+      background-color: #fff;
+      border: 12px solid #5d4037;
+      border-radius: 8px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      overflow: visible;
+    }
+
+    .map-container img.base-map {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: sepia(0.1) contrast(1.05);
+      border-radius: 4px;
+    }
+
+    .marker {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      z-index: 10;
+      cursor: pointer;
+      transform: rotate(-45deg);
+    }
+
+    .marker.active { z-index: 1000; }
+
+    .marker-visual {
+      width: 100%;
+      height: 100%;
+      border: 2px solid white;
+      border-radius: 50% 50% 50% 0;
+      transition: transform 0.3s ease, background-color 0.3s;
+      box-shadow: -2px 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .marker:hover .marker-visual,
+    .marker.active .marker-visual {
+      transform: scale(1.3);
+    }
+
+    /* 顏色定義 */
+    .marker.main .marker-visual { background-color: var(--pin-main); }
+    .marker.main:hover .marker-visual, .marker.main.active .marker-visual { background-color: #d35400; }
+    .marker.extra .marker-visual { background-color: var(--pin-new); }
+    .marker.extra:hover .marker-visual, .marker.extra.active .marker-visual { background-color: #2c3e50; }
+
+    .info-popup {
+      position: absolute;
+      bottom: 50px;
+      left: 0px;
+      transform: rotate(45deg) translateX(-25%);
+      transform-origin: bottom center;
+      width: 230px;
+      background: white;
+      border-top: 5px solid var(--choc-gold);
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      display: none;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .marker.active .info-popup {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: rotate(45deg) translateX(-25%) translateY(10px); }
+      to { opacity: 1; transform: rotate(45deg) translateX(-25%) translateY(0); }
+    }
+
+    .logo-img {
+      width: 100px;
+      height: 50px;
+      object-fit: contain;
+      margin-bottom: 8px;
+      background: #f9f9f9;
+      padding: 3px;
+      border-radius: 4px;
+    }
+
+    .info-popup h3 { margin: 5px 0; font-size: 16px; color: var(--choc-dark); }
+    .info-popup p { font-size: 14px; color: #555; margin: 0; }
+
+    /* 品牌座標 */
+    .p-hershey  { top: 33%; left: 14%; }
+    .p-mars     { top: 35%; left: 19%; }
+    .p-godiva   { top: 26%; left: 47.5%; }
+    .p-lindt    { top: 29.5%; left: 48.5%; }
+    .p-cadbury  { top: 24%; left: 45.5%; }
+    .p-ferrero  { top: 34%; left: 50.8%; }
+    .p-meiji    { top: 35%; left: 84.8%; }
+
+    .p-valrhona { top: 30%; left: 46.5%; }
+    .p-ritter   { top: 25%; left: 49.5%; }
+    .p-mozart   { top: 29%; left: 50.5%; }
+    .p-patchi   { top: 39%; left: 56%; }
+    .p-whittakers { top: 86%; left: 94%; }
+    .p-pocky    { top: 37.5%; left: 83.5%; } /* 日本 Pocky */
+    .p-timtam   { top: 78%; left: 85%; }   /* 澳洲 Tim Tam */
+    .p-ghirardelli { top: 36.5%; left: 12.7%; } /* 美國舊金山 Ghirardelli */
+    .p-lotte    { top: 36.3%; left: 81.8%; }   /* 韓國 Lotte */
+
+    .legend { margin-top: 20px; background: white; padding: 10px 20px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .leg-item { display: inline-block; margin: 0 10px; font-size: 14px; }
+    .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; }
+  </style>
+</head>
+<body>
+
+<h1>🍫 全球著名巧克力品牌分佈圖</h1>
+
+<div class="map-container">
+  <img src="image_dac2dd.png" class="base-map" alt="World Map">
+
+  <div class="marker main p-hershey" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="Hershey's.jpg" class="logo-img">
+      <h3>Hershey's (美國)</h3>
+      <p>美國巧克力象徵，以 Kisses 水滴造型聞名世界。</p>
+    </div>
+  </div>
+
+  <div class="marker main p-mars" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="m&ms.jpg" class="logo-img">
+      <h3>Mars 瑪氏 (美國)</h3>
+      <p>全球食品巨頭，旗下擁有名震全球的<strong>士力架 (Snickers)</strong> 及 M&M's。</p>
+    </div>
+  </div>
+
+  <div class="marker main p-godiva" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="godiva.png" class="logo-img">
+      <h3>Godiva (比利時)</h3>
+      <p>比利時皇家御用品牌，奢華夾心巧克力的全球代表。</p>
+    </div>
+  </div>
+
+  <div class="marker main p-lindt" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="LINDO.png" class="logo-img">
+      <h3>瑞士蓮 (瑞士)</h3>
+      <p>瑞士國寶級品牌，以獨創技術打造 LINDOR 入口即化的口感。</p>
+    </div>
+  </div>
+
+  <div class="marker main p-cadbury" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="Cadbury.jpeg" class="logo-img">
+      <h3>吉百利 (英國)</h3>
+      <p>英國百年經典，以 Dairy Milk 牛奶巧克力系列聞名。</p>
+    </div>
+  </div>
+
+  <div class="marker main p-ferrero" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="Ferrero.jpg" class="logo-img">
+      <h3>費列羅 (義大利)</h3>
+      <p>義大利之光，經典「金沙」榛果巧克力享譽全球。</p>
+    </div>
+  </div>
+
+  <div class="marker main p-meiji" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="meiji.png" class="logo-img">
+      <h3>明治 (日本)</h3>
+      <p>日本巧克力代表，品質穩定且多樣化，深受亞洲歡迎。</p>
+    </div>
+  </div>
+
+  <div class="marker extra p-valrhona" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="valrhona.jpg" class="logo-img">
+      <h3>法芙娜 (法國)</h3>
+      <p>頂級巧克力原料供應商，深受米其林星級主廚推崇。</p>
+    </div>
+  </div>
+
+  <div class="marker extra p-ritter" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="Ritter.jpg" class="logo-img">
+      <h3>Ritter Sport (德國)</h3>
+      <p>德國方塊巧克力，彩色包裝與豐富配料為其主要特色。</p>
+    </div>
+  </div>
+
+  <div class="marker extra p-mozart" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="Mozart.avif" class="logo-img">
+      <h3>Mirabell (奧地利)</h3>
+      <p>正宗奧地利莫札特巧克力球，內含香醇杏仁膏與夾心。</p>
+    </div>
+  </div>
+
+  <div class="marker extra p-pocky" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="Pocky.png" class="logo-img">
+      <h3>Pocky (日本)</h3>
+      <p>全球知名的巧克力棒，其獨特的點心形式已成為流行文化符號。</p>
+    </div>
+  </div>
+
+  <div class="marker extra p-timtam" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="TimTam.avif" class="logo-img">
+      <h3>Tim Tam (澳洲)</h3>
+      <p>澳洲國民巧克力夾心餅乾，以其獨特的 Tim Tam Slam 吃法聞名。</p>
+    </div>
+  </div>
+
+  <div class="marker extra p-ghirardelli" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="Ghirardelli.jpg" class="logo-img">
+      <h3>Ghirardelli (美國)</h3>
+      <p>創立於舊金山，是美國歷史最悠久的巧克力製造商之一，以片裝巧克力著稱。</p>
+    </div>
+  </div>
+
+  <div class="marker extra p-lotte" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="Lotte.png" class="logo-img">
+      <h3>樂天 Lotte (韓國)</h3>
+      <p>韓國食品巨頭，旗下的「巧克力派 (Choco Pie)」及 Crunky 系列廣受好評。</p>
+    </div>
+  </div>
+
+  <div class="marker extra p-patchi" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="Patchi.jpg" class="logo-img">
+      <h3>Patchi (黎巴嫩)</h3>
+      <p>中東高端巧克力名牌，有「巧克力界的愛馬仕」美譽。</p>
+    </div>
+  </div>
+
+  <div class="marker extra p-whittakers" onclick="toggleMarker(this)">
+    <div class="marker-visual"></div>
+    <div class="info-popup">
+      <img src="Whittakers.jpg" class="logo-img">
+      <h3>Whittaker's (紐西蘭)</h3>
+      <p>紐西蘭國寶品牌，堅持「Bean to Bar」的職人品質。</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <div class="leg-item"><span class="dot" style="background: var(--pin-main);"></span> 指定品牌 (橘)</div>
+  <div class="leg-item"><span class="dot" style="background: var(--pin-new);"></span> 新增/非歐區域 (紫)</div>
+</div>
+
+<script>
+  function toggleMarker(el) {
+    const isActive = el.classList.contains('active');
+    document.querySelectorAll('.marker').forEach(m => m.classList.remove('active'));
+    if (!isActive) el.classList.add('active');
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.marker')) {
+      document.querySelectorAll('.marker').forEach(m => m.classList.remove('active'));
+    }
+  });
+</script>
+</body>
+</html>
