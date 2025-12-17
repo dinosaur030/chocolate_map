@@ -145,7 +145,12 @@
 </head>
 <body>
 
-<h1>🍫 全球著名巧克力品牌分佈圖</h1>
+<h1>全球著名巧克力品牌分佈圖</h1>
+<p class="hint">💡 點擊標記，查看更多詳情</p>
+<div class="legend">
+  <div class="leg-item"><span class="dot" style="background: var(--pin-main);"></span> 指定品牌 (橘)</div>
+  <div class="leg-item"><span class="dot" style="background: var(--pin-new);"></span> 新增/非歐區域 (紫)</div>
+</div>
 
 <div class="map-container">
   <img src="image_dac2dd.png" class="base-map" alt="World Map">
@@ -296,10 +301,7 @@
 
 </div>
 
-<div class="legend">
-  <div class="leg-item"><span class="dot" style="background: var(--pin-main);"></span> 指定品牌 (橘)</div>
-  <div class="leg-item"><span class="dot" style="background: var(--pin-new);"></span> 新增/非歐區域 (紫)</div>
-</div>
+
 
 <script>
   function toggleMarker(el) {
